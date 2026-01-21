@@ -1,1 +1,16 @@
-# Brainwave
+# Brainwave 後端平台
+
+這是一個以 **Spring Boot 3.x + Java 17** 為核心的多模組後端專案，目標是提供乾淨的分層結構、可重用的基礎能力，以及穩定的擴充方式，讓後續業務模組能快速成型。
+
+## 設計目標
+- 統一錯誤處理與回應格式，降低 API 行為不一致的風險
+- 模組化分層清楚，業務邏輯可獨立演進
+- 以範例模板引導新增模組的做法，降低重工成本
+
+## 模組定位（概念）
+- `brainwave-core`：共用基礎設施（例外、回應、基底類別、轉換器）
+- `brainwave-service`：業務實作層（Entity/DTO/Service/Repository）
+- `brainwave-backend`：API 層（Controller / 對外介面）
+
+## User 範例定位
+- `user` 模組為可複製的範例模板，後續新增功能請複製後改為實際業務模組名稱。

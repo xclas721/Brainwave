@@ -1,0 +1,53 @@
+# Brainwave 團隊規範（Cursor）
+
+## 專案背景
+- 技術棧：Spring Boot 3.x、Java 17、MySQL、JPA、MapStruct。
+- 分層：`core`（基礎設施） / `service`（業務實作） / `backend`（API 層）。
+
+## 格式化
+- 推送前執行 `mvn spotless:apply -DskipTests -Pspotless`。
+- Java 縮排使用 4 個空白。
+- 檔案需以換行結尾，移除行尾空白。
+
+## 結構
+- 業務邏輯放在 `brainwave-service`，Controller 放在 `brainwave-backend`，共用工具放在 `brainwave-core`。
+- `user` 模組作為範例模板；正式功能請複製後改名成實際業務模組。
+
+## 命名規範
+- 類別用名詞、方法用動詞，避免不必要縮寫。
+- DTO/VO/Request 命名要清楚（例如 `UserRequest`、`UserDto`、`UserVo`）。
+
+## 程式碼風格
+- 方法保持單一職責與可讀性，避免過長。
+- 使用 guard clause 提早返回，避免過多巢狀。
+- Request DTO 加上 validation 註解。
+
+## 錯誤處理
+- 業務錯誤用 `BusinessException`。
+- 找不到資源用 `ResourceNotFoundException`。
+- Controller 只回傳 `Result<T>` 統一格式。
+
+## 測試與檢查
+- CI 或 PR 前執行 `mvn spotless:check -DskipTests -Pspotless`。
+- 需要時執行 `mvn clean install` 做完整驗證。
+
+## Commit 規範
+- 格式：`type(scope): subject`
+- type：`feat`/`fix`/`refactor`/`chore`/`docs`/`test`
+- scope：模組或範圍（如 `core`/`service`/`backend`/`build`）
+- 範例：`chore(build): initial brainwave backend scaffold`
+- 請由人員手動操作 Git（AI 不得自行執行 git 指令）
+
+## 範例（正確 / 錯誤）
+✅ 正確（Controller）
+```
+@RestController
+@RequestMapping("/api/users")
+public class UserController extends BaseController {
+}
+```
+
+❌ 錯誤（在 core 放業務）
+```
+// 不要在 brainwave-core 放業務邏輯
+```
