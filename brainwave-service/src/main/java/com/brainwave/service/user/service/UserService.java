@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.brainwave.core.utils.PasswordUtil;
+
 @Service
 public class UserService extends BaseServiceImpl<UserEntity, Long, UserRepository> {
 
@@ -32,10 +34,27 @@ public class UserService extends BaseServiceImpl<UserEntity, Long, UserRepositor
         if (repository.existsByEmail(request.getEmail())) {
             throw new BusinessException("EMAIL_EXISTS", "Email 已存在 " + request.getEmail());
         }
+        if (repository.findByUsername(request.getUsername()).isPresent()) {
+            throw new BusinessException("USERNAME_EXISTS", "帳號 已存在 " + request.getUsername());
+        }
 
         UserEntity entity = userConverter.toEntityFromRequest(request);
+        // 加密密碼 (預設 123456 如果沒給，或者強制要求)
+        String rawPwd = request.getPassword() != null ? request.getPassword() : "123456";
+        entity.setPassword(PasswordUtil.encode(rawPwd));
+
         UserEntity saved = save(entity);
         return userConverter.toDto(saved);
+    }
+
+    public UserDto login(String username, String password) {
+        UserEntity user = repository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException("AUTH_FAILED", "帳號或密碼錯誤"));
+
+        if (!PasswordUtil.matches(password, user.getPassword())) {
+            throw new BusinessException("AUTH_FAILED", "帳號或密碼錯誤");
+        }
+        return userConverter.toDto(user);
     }
 
     public UserDto getUserById(Long id) {

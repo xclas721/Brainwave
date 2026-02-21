@@ -1,4 +1,4 @@
-package com.brainwave.service.user.entity;
+package com.brainwave.service.member.entity;
 
 import com.brainwave.core.base.BaseEntity;
 import jakarta.persistence.Column;
@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "members")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity extends BaseEntity {
+public class MemberEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;

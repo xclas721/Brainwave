@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
  * 前端 API 服務，提供 RESTful API 給前端使用
  */
 @Import({BrainwaveCoreConfiguration.class, BrainwaveServiceConfiguration.class})
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.brainwave.backend", "com.brainwave.service", "com.brainwave.core"})
 public class BrainwaveBackendApplication {
 
     public static void main(String[] args) {

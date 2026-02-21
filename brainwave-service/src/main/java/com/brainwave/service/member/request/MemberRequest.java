@@ -1,4 +1,4 @@
-package com.brainwave.service.user.request;
+package com.brainwave.service.member.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequest {
+public class MemberRequest {
 
     @NotBlank(message = "帳號必填")
     private String username;
 
-    private String password; // 密碼（更新時可選）
+    private String password;
 
     @NotBlank(message = "姓名必填有誤")
     private String name;

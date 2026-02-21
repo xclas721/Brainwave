@@ -1,4 +1,4 @@
-package com.brainwave.service.user.dto;
+package com.brainwave.service.member.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class MemberVo {
 
     private Long id;
     private String username;
