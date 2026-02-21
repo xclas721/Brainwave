@@ -89,7 +89,10 @@ public class UserController extends BaseController {
                 .phone(phone)
                 .build();
 
-        // 建立分頁和排序
+        // 建立分頁和排序（滿足 null 安全：RequestParam 在缺少參數時可能為 null）
+        if (direction == null) {
+            direction = Sort.Direction.ASC;
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // 執行查詢並自動轉換為 PageResponse

@@ -52,6 +52,9 @@ public class UserService extends BaseServiceImpl<UserEntity, Long, UserRepositor
      * 分頁查詢使用者（支援條件查詢）
      */
     public Page<UserVo> searchUsers(UserSearchRequest request, Pageable pageable) {
+        if (pageable == null) {
+            throw new IllegalArgumentException("pageable must not be null");
+        }
         Specification<UserEntity> spec = buildSearchSpecification(request);
         Page<UserEntity> page = repository.findAll(spec, pageable);
         return page.map(userConverter::toVo);
