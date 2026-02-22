@@ -7,6 +7,7 @@ import com.brainwave.service.member.request.MemberRequest;
 import com.brainwave.service.member.vo.MemberVo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -17,4 +18,11 @@ public interface MemberConverter extends BaseConverter<MemberEntity, MemberDto, 
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     MemberEntity toEntityFromRequest(MemberRequest request);
+
+    @Override
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntityFromRequest(MemberRequest request, @MappingTarget MemberEntity entity);
 }

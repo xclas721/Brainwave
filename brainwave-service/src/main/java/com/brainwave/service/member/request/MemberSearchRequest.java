@@ -1,22 +1,20 @@
-package com.brainwave.service.member.vo;
+package com.brainwave.service.member.request;
 
-import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 會員查詢請求
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberVo {
+public class MemberSearchRequest {
 
-    private Long id;
-    private String username;
     private String name;
     private String email;
     private String phone;
-    private Instant createdAt;
-    private Instant updatedAt;
 }
