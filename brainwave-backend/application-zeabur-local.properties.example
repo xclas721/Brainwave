@@ -1,0 +1,5 @@
+# 連 Zeabur MySQL（複製為 application-zeabur-local.properties 後填入，勿提交）
+# 使用方式：複製此檔為 application-zeabur-local.properties，改為實際連線資訊。執行時 profile=zeabur。
+spring.datasource.url=jdbc:mysql://YOUR_HOST:YOUR_PORT/zeabur?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Taipei
+spring.datasource.username=root
+spring.datasource.password=YOUR_PASSWORD

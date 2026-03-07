@@ -19,6 +19,9 @@
 *.tar.gz
 *.rar
 
+# 本地開發用（含密碼，勿提交）
+brainwave-backend/application-zeabur-local.properties
+
 # Maven / Gradle
 target/
 */target/
