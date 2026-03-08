@@ -7,6 +7,7 @@ import com.brainwave.service.user.converter.UserConverter;
 import com.brainwave.service.user.dto.UserDto;
 import com.brainwave.service.user.request.UserRequest;
 import com.brainwave.service.user.request.UserSearchRequest;
+import com.brainwave.service.user.request.UserUpdateRequest;
 import com.brainwave.service.user.service.UserService;
 import com.brainwave.service.user.vo.UserVo;
 import jakarta.validation.Valid;
@@ -101,12 +102,12 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 更新使用者
+     * 更新使用者（僅 profile：username, name, email, phone；不含密碼）
      */
     @PutMapping("/{id}")
     public ResponseEntity<Result<UserDto>> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserRequest request) {
+            @Valid @RequestBody UserUpdateRequest request) {
         UserDto userDto = userService.updateUser(id, request);
         return success("使用者更新成功", userDto);
     }

@@ -2,22 +2,23 @@ package com.brainwave.service.user.service;
 
 import com.brainwave.core.base.BaseServiceImpl;
 import com.brainwave.core.exception.BusinessException;
+import com.brainwave.core.utils.PasswordUtil;
 import com.brainwave.service.user.converter.UserConverter;
 import com.brainwave.service.user.dto.UserDto;
 import com.brainwave.service.user.entity.UserEntity;
 import com.brainwave.service.user.repository.UserRepository;
 import com.brainwave.service.user.request.UserRequest;
 import com.brainwave.service.user.request.UserSearchRequest;
+import com.brainwave.service.user.request.UserUpdateRequest;
 import com.brainwave.service.user.vo.UserVo;
 import jakarta.persistence.criteria.Predicate;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.brainwave.core.utils.PasswordUtil;
 
 @Service
 public class UserService extends BaseServiceImpl<UserEntity, Long, UserRepository> {
@@ -110,14 +111,14 @@ public class UserService extends BaseServiceImpl<UserEntity, Long, UserRepositor
     }
 
     @Transactional
-    public UserDto updateUser(Long id, UserRequest request) {
+    public UserDto updateUser(Long id, UserUpdateRequest request) {
         UserEntity entity = findByIdOrThrow(id);
 
-        if (!entity.getEmail().equals(request.getEmail()) && repository.existsByEmail(request.getEmail())) {
+        if (!Objects.equals(entity.getEmail(), request.getEmail()) && repository.existsByEmail(request.getEmail())) {
             throw new BusinessException("EMAIL_EXISTS", "Email 已存在 " + request.getEmail());
         }
 
-        userConverter.updateEntityFromRequest(request, entity);
+        userConverter.updateEntityFromUpdateRequest(request, entity);
         UserEntity updated = save(entity);
         return userConverter.toDto(updated);
     }
