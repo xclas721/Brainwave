@@ -1,0 +1,136 @@
+# Identity 模組模板（Boilerplate 版）
+
+更新時間：2026-03-09  
+適用範圍：`Brainwave` 後端模組（`brainwave-core` / `brainwave-service` / `brainwave-backend`）
+
+---
+
+## 1) 目標與定位
+
+目前專案內建了一組 `User`（後台帳號）與 `Member`（前台會員）的雙軌範例。  
+這份模板的目的，是把這個作法「抽象成一套可以複製的 Identity/Account 樣板」，  
+讓未來的新專案可以依照實際情境，明確選擇要走單軌還是雙軌：
+
+- **單軌**：只保留一套帳號模型（最常見的情境）
+- **雙軌**：後台帳號與前台會員分離（例如：後台管理系統 + 會員前台）
+
+設計原則：
+
+- 先建立一致的目錄結構與命名規則，再來決定是否要拆成雙軌。
+- 優先考慮「可替換、好維護」，避免把目前的範例模組當成唯一解或硬性標準。
+
+---
+
+## 2) 建議目錄骨架（標準）
+
+```text
+brainwave-service/src/main/java/com/brainwave/service/identity/
+|-- entity/IdentityEntity.java
+|-- repository/IdentityRepository.java
+|-- service/IdentityService.java
+|-- converter/IdentityConverter.java
+|-- dto/IdentityDto.java
+|-- vo/IdentityVo.java
+`-- request/
+    |-- IdentityRequest.java
+    |-- IdentityUpdateRequest.java
+    `-- IdentitySearchRequest.java
+
+brainwave-backend/src/main/java/com/brainwave/backend/identity/
+`-- IdentityController.java
+```
+
+> 現有 `user/`、`member/` 可以被視為這個骨架的兩個「示範實作」，  
+> 但未來的新專案不一定要維持雙軌，可以直接只建一個 `identity` / `account` 模組。
+
+---
+
+## 3) 命名與契約規範
+
+### 3.1 類別命名
+
+一個 Identity 類模組，大致會長出這幾種型別，建議統一命名，降低日後閱讀成本：
+
+- Entity：`<Domain>Entity`
+- Repository：`<Domain>Repository`
+- Service：`<Domain>Service`
+- Converter：`<Domain>Converter`
+- DTO：`<Domain>Dto`
+- VO：`<Domain>Vo`
+- Request：
+  - 新增：`<Domain>Request`
+  - 更新：`<Domain>UpdateRequest`
+  - 搜尋：`<Domain>SearchRequest`
+- Controller：`<Domain>Controller`
+
+### 3.2 API 命名
+
+路由以 RESTful 風格為主，`<resources>` 建議使用複數名詞：
+
+- 查詢列表：`GET /api/<resources>/search`
+- 查詢單筆：`GET /api/<resources>/{id}`
+- 新增：`POST /api/<resources>`
+- 更新：`PUT /api/<resources>/{id}`
+- 刪除：`DELETE /api/<resources>/{id}`
+
+### 3.3 回應規格
+
+為了跟整個專案的共用層對齊，建議全部走統一回應物件：
+
+- 成功：`Result<T>`
+- 分頁：`Result<PageResponse<T>>`
+- 錯誤：由 `GlobalExceptionHandler`、`BusinessException` 等核心元件統一處理
+
+---
+
+## 4) 單軌 / 雙軌怎麼選？
+
+這張表是給「一開始還在想要不要拆前後台」時用的快速判斷：
+
+| 條件                                           | 建議                     |
+|----------------------------------------------|------------------------|
+| 只有一套登入入口、同一類帳號角色              | 單軌（Identity）        |
+| 前後台資料模型、生命周期、權限策略明顯不同    | 雙軌（User + Member）   |
+| 早期需求不明、未來是否拆分還沒定案           | 先單軌，設計時預留可拆點 |
+
+---
+
+## 5) User/Member 要整併成 Identity 時怎麼做？（約 1 小時）
+
+如果某個專案一開始用雙軌，但後來發現其實只需要一種帳號，可以用這個「一小時版本」收斂成單軌 Identity：
+
+1. 建立 `identity` 套件（結構依第 2 節骨架）。  
+2. 以 `user` 流程為基底複製一份到 `identity`，再把 `member` 的差異欄位與行為補進來。  
+3. 後端 controller 路由收斂成一組，例如 `/api/accounts`。  
+4. 前端改用單一 `accountService`，`userService` / `memberService` 可先保留別名，做一兩版過渡。  
+5. 驗證：
+   - `mvn test` 必須全綠。
+   - 至少跑一輪 `search/get/create/update` 的手動 smoke test。  
+6. 一切穩定後，再決定是否移除 `user/member` 舊路徑（建議先標為 deprecated，下一版再正式移除）。
+
+---
+
+## 6) 跟 P0-1 認證/授權邊界怎麼搭配？
+
+P0-1 已經幫你把「登入 + Token 驗證 + 權限保護」抽成 `AuthFacade` / `TokenVerifier` / `AuthGuardInterceptor`。  
+Identity 模組只要做好「帳號本身」即可，不需要也不應該直接碰 Token 細節。
+
+- 認證入口：一律透過 `AuthFacade`（例如 admin login、front login）。  
+- Token 驗證：一律透過 `TokenVerifier`。  
+- Identity 模組只負責：
+  - 帳號是否存在、狀態是否允許登入。
+  - 帳號的基本屬性與業務規則（名稱、Email、啟用狀態等）。
+
+---
+
+## 7) 最小完成定義（P0-2）
+
+要說「P0-2 模組模板化（Identity 抽象）已經完成」，至少要滿足：
+
+- 有這份模板文件（本檔），清楚說明設計意圖與使用情境。  
+- 有一致的命名規範與 API 路由契約可參考。  
+- 有單軌 / 雙軌的決策準則，不會一開始就被雙軌綁死。  
+- 有實際可執行的整併步驟，幫助從 `user/member` 收斂到 `identity`。  
+
+如果未來想要再進一步，可以在 `identity` 套件底下補一組「可以編譯的 Identity skeleton + 範例 Controller」，  
+當成新專案直接複製的起手 code。
