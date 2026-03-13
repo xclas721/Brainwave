@@ -1,0 +1,89 @@
+# Audit Log 使用說明（P1-2）
+
+> 目標：用最小成本先有「誰在打哪個 API、做了什麼、成功或失敗、花多久」的稽核軌跡。
+
+## 1. 啟用方式
+
+- 設定檔：`app.audit.*`
+  - `app.audit.enabled`：是否啟用稽核（預設 false）
+  - `app.audit.include-request-body`：暫不使用，預留未來記錄 body 用
+  - `app.audit.include-response-body`：暫不使用，預留未來記錄 body 用
+  - `app.audit.max-body-length`：未來記錄 body 時的長度上限
+  - `app.audit.mask-fields`：未來要遮罩的欄位（目前只定義，不實際使用）
+
+在本地要啟用稽核，只要在環境或 `application-local.properties` 設定：
+
+```properties
+app.audit.enabled=true
+```
+
+啟用後，凡標記了 `@Audit` 的方法，會在 log 中輸出一行 AUDIT 訊息。
+
+## 2. 稽核註解 `@Audit`
+
+位置：`brainwave-core/src/main/java/com/brainwave/core/audit/Audit.java`
+
+用法（加在 Controller 或 Service 方法上）：
+
+```java
+@Audit(action = "CREATE_USER", resource = "USER")
+public ResponseEntity<Result<UserDto>> createUser(@Valid @RequestBody UserRequest request) { ... }
+```
+
+欄位說明：
+
+- `action`：這次操作的名稱，例如 `CREATE_USER`、`UPDATE_CONFIG`。
+- `resource`：操作目標資源，例如 `USER`、`SYSTEM_CONFIG`；若未指定，預設會使用 `類別名.方法名`。
+
+## 3. 切面行為 `AuditAspect`
+
+位置：`brainwave-core/src/main/java/com/brainwave/core/audit/AuditAspect.java`
+
+行為摘要：
+
+- 使用 Spring AOP 攔截所有標記了 `@Audit` 的方法。
+- 先執行原本方法（`joinPoint.proceed()`），不更動回傳值與例外流程。
+- 若 `app.audit.enabled=false`，則不輸出任何稽核 log。
+- 若 `app.audit.enabled=true`，則在 finally 區塊輸出一條類似下列格式的 log：
+
+```text
+AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true durationMs=34
+```
+
+目前記錄的欄位：
+
+- `action`：來自 `@Audit(action = ...)`
+- `resource`：來自 `@Audit(resource = ...)`，或預設類別名.方法名
+- `method`：HTTP 方法（GET/POST/PUT/DELETE…）
+- `path`：請求路徑（例如 `/api/users`、`/api/system-configs`）
+- `success`：boolean，方法是否拋出例外
+- `durationMs`：方法執行時間（毫秒）
+
+## 4. 已掛載範例
+
+目前示範範圍（之後可視需求擴充）：
+
+- `UserController`（`brainwave-backend`）
+  - `createUser`：`@Audit(action = "CREATE_USER", resource = "USER")`
+  - `updateUser`：`@Audit(action = "UPDATE_USER", resource = "USER")`
+  - `deleteUser`：`@Audit(action = "DELETE_USER", resource = "USER")`
+
+這些 API 在 `app.audit.enabled=true` 時，每次被呼叫都會產生一筆 AUDIT log。
+
+## 5. 後續可擴充方向（非本次範圍）
+
+1. **加入「誰」的資訊**
+   - 從 `AuthGuardInterceptor` 放進 request attribute 的 `TokenPrincipal` 取出 subject / scope。
+   - 在 AUDIT log 中加入例如 `principal=ADMIN_USER(id=7)`。
+
+2. **落地到 DB 或外部 log 系統**
+   - 新增 `audit_log` table 或對接 ELK / Loki 等集中 log 系統。
+   - 切面在寫 console log 之外，再寫一份到 `AuditLogService`。
+
+3. **支援記錄 request/response body**
+   - 依 `AuditProperties` 的 include* 與 maxBodyLength 決定是否抓 body。
+   - 對 `maskFields` 中的欄位做遮罩（例如密碼、token）。
+
+4. **標準化格式與 trace id 整合**
+   - 後續若導入 Correlation ID / Request ID，可將該 ID 一併寫入 AUDIT log，方便跨系統追蹤。
+
