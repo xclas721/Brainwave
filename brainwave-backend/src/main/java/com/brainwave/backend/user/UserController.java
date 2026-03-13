@@ -1,5 +1,6 @@
 package com.brainwave.backend.user;
 
+import com.brainwave.core.audit.Audit;
 import com.brainwave.core.common.BaseController;
 import com.brainwave.core.common.PageResponse;
 import com.brainwave.core.common.Result;
@@ -43,6 +44,7 @@ public class UserController extends BaseController {
      * 新增使用者
      */
     @PostMapping
+    @Audit(action = "CREATE_USER", resource = "USER")
     public ResponseEntity<Result<UserDto>> createUser(@Valid @RequestBody UserRequest request) {
         UserDto userDto = userService.createUser(request);
         return success("使用者新增成功", userDto);
@@ -105,6 +107,7 @@ public class UserController extends BaseController {
      * 更新使用者（僅 profile：username, name, email, phone；不含密碼）
      */
     @PutMapping("/{id}")
+    @Audit(action = "UPDATE_USER", resource = "USER")
     public ResponseEntity<Result<UserDto>> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest request) {
@@ -116,6 +119,7 @@ public class UserController extends BaseController {
      * 刪除使用者
      */
     @DeleteMapping("/{id}")
+    @Audit(action = "DELETE_USER", resource = "USER")
     public ResponseEntity<Result<Void>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return success("使用者刪除成功", null);
