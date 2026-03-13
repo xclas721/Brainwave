@@ -1,0 +1,94 @@
+# File Storage 抽象使用說明（P1-3）
+
+> 目標：提供一層可替換的 StorageService 介面，先接本地檔案系統，未來可換到 S3/MinIO。
+
+## 1. 設定入口：app.storage.*
+
+所有儲存相關設定集中在 `StorageProperties`（`brainwave-core/config/properties/StorageProperties.java`）：
+
+- `app.storage.provider`：目前支援 `local`（預設）
+- `app.storage.local.base-path`：本地儲存根目錄（預設 `./uploads`）
+- `app.storage.local.public-base-url`：對外公開 URL 前綴（可選）
+- `app.storage.s3.*`：預留給未來 S3/MinIO 實作使用
+
+範例（application.properties）：
+
+```properties
+app.storage.provider=local
+app.storage.local.base-path=./uploads
+app.storage.local.public-base-url=https://cdn.example.com/files
+```
+
+## 2. 抽象介面：StorageService
+
+位置：`brainwave-core/src/main/java/com/brainwave/core/storage/StorageService.java`
+
+目前只定義兩個最小方法：
+
+- `String store(String pathUnderBase, InputStream inputStream)`
+  - 負責把檔案寫到實際儲存介質。
+  - `pathUnderBase` 例如：`avatars/user-1.png`。
+  - 回傳值為儲存後的「相對路徑或 key」，之後可再丟給 `toPublicUrl`。
+
+- `String toPublicUrl(String storedPath)`
+  - 接收 `store` 回傳的相對路徑/key，產出對外可用的 URL。
+  - 若未設定 `publicBaseUrl`，預設直接回傳原始 `storedPath`。
+
+相關錯誤統一透過 `StorageException`（`STORAGE_STORE_FAILED`、`STORAGE_NOT_FOUND` 等）丟出。
+
+## 3. 本地實作：LocalStorageService
+
+位置：`brainwave-service/src/main/java/com/brainwave/service/storage/LocalStorageService.java`
+
+行為：
+
+- 僅在 `app.storage.provider=local` 時運作，否則丟出 `STORAGE_PROVIDER_MISMATCH`。
+- 真實存放路徑為：
+
+```text
+<base-path>/<pathUnderBase>
+```
+
+- 儲存流程：
+  1. 清理路徑字串（`StringUtils.cleanPath`）。
+  2. 以 `basePath` 建立目錄（`Files.createDirectories`）。
+  3. 使用 `Files.copy` 將 InputStream 寫入檔案。
+  4. 回傳相對路徑（`pathUnderBase`，使用 `/` 作為分隔）。
+
+- 公開 URL 流程：
+  - 若 `publicBaseUrl` 有設定，則：
+
+    ```text
+    publicUrl = publicBaseUrl + "/" + storedPath
+    ```
+
+  - 若未設定，則直接回傳 `storedPath`。
+
+## 4. 測試與驗證
+
+- `LocalStorageServiceTest`：
+  - 驗證 `store` 會在指定 basePath 下建立檔案，內容正確。
+  - 驗證 `toPublicUrl` 會正確組出公開 URL。
+
+執行：
+
+```bash
+mvn test -q
+```
+
+會包含 Storage 相關測試在內（與整體專案一起跑）。
+
+## 5. 未來擴充方向（非本次範圍）
+
+1. **S3/MinIO 實作**
+   - 依 `app.storage.provider=s3` 切換到新的 `S3StorageService`。
+   - 使用 `StorageProperties.S3` 的 endpoint/region/bucket 連線。
+
+2. **後端上傳/下載 API**
+   - 新增 Upload API（接受 MultipartFile，呼叫 `StorageService.store`）。
+   - 新增 Download/Proxy API（透過本地檔案或轉向至 S3 URL）。
+
+3. **整合 Audit 與 System Config**
+   - 在檔案操作上加 `@Audit`，記錄誰上傳/刪除了什麼檔案。
+   - 透過 System Config 控制允許上傳的檔案大小、檔案類型白名單等。
+
