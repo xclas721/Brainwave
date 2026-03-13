@@ -1,9 +1,9 @@
 package com.brainwave.core.config;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Value;
+import com.brainwave.core.config.properties.CorsProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -15,13 +15,10 @@ import org.springframework.web.filter.CorsFilter;
  * 允許前端應用程式存取後端 API
  */
 @Configuration
+@RequiredArgsConstructor
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
-    private String allowedOrigins;
-
-    @Value("${app.cors.allow-credentials:true}")
-    private boolean allowCredentials;
+    private final CorsProperties corsProperties;
 
     @Bean
     public CorsFilter corsFilter() {
@@ -29,7 +26,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 使用白名單來源，避免 wildcard + credentials 造成風險
-        List<String> originList = Arrays.stream(allowedOrigins.split(","))
+        List<String> originList = corsProperties.getAllowedOrigins().stream()
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
@@ -44,7 +41,7 @@ public class CorsConfig {
         config.addAllowedMethod("OPTIONS");
 
         // 允許的請求標頭（含目前前端實際送出的自定義 header）
-        config.setAllowedHeaders(Arrays.asList(
+        config.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
                 "Accept",
@@ -56,7 +53,7 @@ public class CorsConfig {
         config.setExposedHeaders(List.of("Authorization"));
 
         // 是否允許攜帶憑證（Cookie / Authorization）
-        config.setAllowCredentials(allowCredentials);
+        config.setAllowCredentials(corsProperties.isAllowCredentials());
 
         // 預檢請求的緩存時間（秒）
         config.setMaxAge(3600L);

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.brainwave.backend.auth.dto.AuthLoginResult;
 import com.brainwave.backend.auth.dto.TokenPrincipal;
 import com.brainwave.backend.auth.token.TokenVerifier;
+import com.brainwave.core.config.properties.AuthProperties;
 import com.brainwave.service.member.dto.MemberDto;
 import com.brainwave.service.member.service.MemberService;
 import com.brainwave.service.user.dto.UserDto;
@@ -14,10 +15,8 @@ import com.brainwave.service.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultAuthFacadeTest {
@@ -31,15 +30,16 @@ class DefaultAuthFacadeTest {
     @Mock
     private TokenVerifier tokenVerifier;
 
-    @InjectMocks
     private DefaultAuthFacade authFacade;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(authFacade, "adminDemoUsername", "demo");
-        ReflectionTestUtils.setField(authFacade, "adminDemoPassword", "demo");
-        ReflectionTestUtils.setField(authFacade, "frontDemoUsername", "demo");
-        ReflectionTestUtils.setField(authFacade, "frontDemoPassword", "demo");
+        AuthProperties authProperties = new AuthProperties();
+        authProperties.getDemo().setUsername("demo");
+        authProperties.getDemo().setPassword("demo");
+        authProperties.getFront().getDemo().setUsername("demo");
+        authProperties.getFront().getDemo().setPassword("demo");
+        authFacade = new DefaultAuthFacade(userService, memberService, tokenVerifier, authProperties);
     }
 
     @Test

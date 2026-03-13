@@ -2,10 +2,10 @@ package com.brainwave.backend.auth.guard;
 
 import com.brainwave.backend.auth.dto.TokenPrincipal;
 import com.brainwave.backend.auth.facade.AuthFacade;
+import com.brainwave.core.config.properties.AuthProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -19,13 +19,11 @@ public class AuthGuardInterceptor implements HandlerInterceptor {
     public static final String ATTR_AUTH_PRINCIPAL = "auth.principal";
 
     private final AuthFacade authFacade;
-
-    @Value("${app.auth.guard.enabled:true}")
-    private boolean enabled;
+    private final AuthProperties authProperties;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (!enabled) {
+        if (!authProperties.getGuard().isEnabled()) {
             return true;
         }
 

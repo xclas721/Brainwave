@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.brainwave.backend.auth.dto.TokenPrincipal;
 import com.brainwave.backend.auth.facade.AuthFacade;
+import com.brainwave.core.config.properties.AuthProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,12 +25,14 @@ class AuthGuardInterceptorTest {
     @Mock
     private AuthFacade authFacade;
 
+    private AuthProperties authProperties;
     private AuthGuardInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        interceptor = new AuthGuardInterceptor(authFacade);
-        ReflectionTestUtils.setField(interceptor, "enabled", true);
+        authProperties = new AuthProperties();
+        authProperties.getGuard().setEnabled(true);
+        interceptor = new AuthGuardInterceptor(authFacade, authProperties);
     }
 
     @Test

@@ -1,0 +1,94 @@
+{
+  "properties": [
+    {
+      "name": "app.auth.demo.username",
+      "type": "java.lang.String",
+      "description": "後台 Demo 帳號（開發用）。"
+    },
+    {
+      "name": "app.auth.demo.password",
+      "type": "java.lang.String",
+      "description": "後台 Demo 密碼（開發用）。"
+    },
+    {
+      "name": "app.auth.front.demo.username",
+      "type": "java.lang.String",
+      "description": "前台 Demo 帳號（開發用）。"
+    },
+    {
+      "name": "app.auth.front.demo.password",
+      "type": "java.lang.String",
+      "description": "前台 Demo 密碼（開發用）。"
+    },
+    {
+      "name": "app.auth.guard.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否啟用 API Auth Guard。"
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "允許跨域來源白名單。"
+    },
+    {
+      "name": "app.cors.allow-credentials",
+      "type": "java.lang.Boolean",
+      "description": "是否允許攜帶憑證。"
+    },
+    {
+      "name": "app.storage.provider",
+      "type": "java.lang.String",
+      "description": "儲存提供者（local/s3）。"
+    },
+    {
+      "name": "app.storage.local.base-path",
+      "type": "java.lang.String",
+      "description": "本地儲存根目錄。"
+    },
+    {
+      "name": "app.storage.local.public-base-url",
+      "type": "java.lang.String",
+      "description": "本地檔案公開 URL 前綴。"
+    },
+    {
+      "name": "app.storage.s3.endpoint",
+      "type": "java.lang.String",
+      "description": "S3 相容服務端點。"
+    },
+    {
+      "name": "app.storage.s3.region",
+      "type": "java.lang.String",
+      "description": "S3 區域。"
+    },
+    {
+      "name": "app.storage.s3.bucket",
+      "type": "java.lang.String",
+      "description": "S3 Bucket 名稱。"
+    },
+    {
+      "name": "app.audit.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否啟用稽核日誌。"
+    },
+    {
+      "name": "app.audit.include-request-body",
+      "type": "java.lang.Boolean",
+      "description": "稽核日誌是否記錄 request body。"
+    },
+    {
+      "name": "app.audit.include-response-body",
+      "type": "java.lang.Boolean",
+      "description": "稽核日誌是否記錄 response body。"
+    },
+    {
+      "name": "app.audit.max-body-length",
+      "type": "java.lang.Integer",
+      "description": "稽核日誌 body 最大記錄長度。"
+    },
+    {
+      "name": "app.audit.mask-fields",
+      "type": "java.util.List<java.lang.String>",
+      "description": "稽核日誌需遮罩的欄位名稱清單。"
+    }
+  ]
+}
