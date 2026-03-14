@@ -10,10 +10,17 @@ import com.brainwave.service.user.request.UserRequest;
 import com.brainwave.service.user.request.UserSearchRequest;
 import com.brainwave.service.user.request.UserUpdateRequest;
 import com.brainwave.service.user.service.UserService;
+import com.brainwave.core.export.CsvExportHelper;
 import com.brainwave.service.user.vo.UserVo;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +34,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * 使用者 Controller - 基於 BaseController 的 RESTful API
@@ -68,6 +77,39 @@ public class UserController extends BaseController {
     public ResponseEntity<Result<List<UserVo>>> getAllUsers() {
         List<UserVo> users = userService.getAllUsers();
         return success(users);
+    }
+
+    /**
+     * 匯出使用者列表為 CSV（示範 CsvExportHelper 用法；需 ADMIN 權限）
+     */
+    @GetMapping(value = "/export", produces = "text/csv; charset=UTF-8")
+    public ResponseEntity<byte[]> exportUsersCsv() {
+        List<UserVo> users = userService.getAllUsers();
+        List<String> headers = List.of("ID", "帳號", "姓名", "Email", "電話", "建立時間", "更新時間");
+        List<List<String>> rows = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
+        for (UserVo vo : users) {
+            rows.add(List.of(
+                    vo.getId() != null ? vo.getId().toString() : "",
+                    vo.getUsername() != null ? vo.getUsername() : "",
+                    vo.getName() != null ? vo.getName() : "",
+                    vo.getEmail() != null ? vo.getEmail() : "",
+                    vo.getPhone() != null ? vo.getPhone() : "",
+                    vo.getCreatedAt() != null ? formatter.format(vo.getCreatedAt()) : "",
+                    vo.getUpdatedAt() != null ? formatter.format(vo.getUpdatedAt()) : ""
+            ));
+        }
+        try {
+            byte[] csv = CsvExportHelper.toCsvBytes(headers, rows);
+            HttpHeaders respHeaders = new HttpHeaders();
+            respHeaders.setContentDispositionFormData("attachment", "users.csv");
+            return ResponseEntity.ok()
+                    .headers(respHeaders)
+                    .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                    .body(csv);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "匯出失敗", e);
+        }
     }
 
     /**

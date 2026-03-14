@@ -26,7 +26,7 @@ class LocalStorageServiceTest {
 
     @Test
     void store_shouldCreateFileUnderBasePath() throws Exception {
-        String path = "avatars/user-1.txt";
+        String path = "avatars/user-" + System.nanoTime() + ".txt";
         String content = "hello";
 
         String storedPath = localStorageService.store(path, new ByteArrayInputStream(content.getBytes()));
