@@ -6,18 +6,26 @@
 
 - 設定檔：`app.audit.*`
   - `app.audit.enabled`：是否啟用稽核（預設 false）
+  - **`app.audit.sink`**：輸出目標，`console`（僅 log，預設）或 `db`（寫入 audit_log 表）
   - `app.audit.include-request-body`：暫不使用，預留未來記錄 body 用
   - `app.audit.include-response-body`：暫不使用，預留未來記錄 body 用
   - `app.audit.max-body-length`：未來記錄 body 時的長度上限
   - `app.audit.mask-fields`：未來要遮罩的欄位（目前只定義，不實際使用）
 
-在本地要啟用稽核，只要在環境或 `application-local.properties` 設定：
+在本地要啟用稽核（僅 log），在環境或 `application-local.properties` 設定：
 
 ```properties
 app.audit.enabled=true
 ```
 
-啟用後，凡標記了 `@Audit` 的方法，會在 log 中輸出一行 AUDIT 訊息。
+要改為**寫入 DB**（合規／查詢用），再加上：
+
+```properties
+app.audit.enabled=true
+app.audit.sink=db
+```
+
+需有 `audit_log` 表（Flyway  migration `V2__audit_log.sql`）。啟用後，凡標記了 `@Audit` 的方法會依 sink 輸出至 log 或 DB。
 
 ## 2. 稽核註解 `@Audit`
 
@@ -76,9 +84,7 @@ AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true 
 
 1. ~~**加入「誰」的資訊**~~（已實作：AuditAspect 從 request attribute `auth.principal` 取 principal，並從 MDC 取 requestId 一併寫入 log。）
 
-2. **落地到 DB 或外部 log 系統**
-   - 新增 `audit_log` table 或對接 ELK / Loki 等集中 log 系統。
-   - 切面在寫 console log 之外，再寫一份到 `AuditLogService`。
+2. ~~**落地到 DB 或外部 log 系統**~~（已實作：`app.audit.sink=db` 時由 `DbAuditLogService` 寫入 `audit_log` 表；`AuditLogService` 介面、`ConsoleAuditLogService` / `DbAuditLogService` 依 sink 切換。）
 
 3. **支援記錄 request/response body**
    - 依 `AuditProperties` 的 include* 與 maxBodyLength 決定是否抓 body。

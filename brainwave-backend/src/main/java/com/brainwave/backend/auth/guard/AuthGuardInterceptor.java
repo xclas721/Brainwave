@@ -58,19 +58,23 @@ public class AuthGuardInterceptor implements HandlerInterceptor {
         if (path == null) {
             return AuthRequirement.NONE;
         }
+        var guard = authProperties.getGuard();
 
-        if (path.startsWith("/api/users") || path.startsWith("/api/members")) {
-            return AuthRequirement.ADMIN;
+        for (String exclude : guard.getFrontExcludePrefixes()) {
+            if (exclude != null && path.startsWith(exclude)) {
+                return AuthRequirement.NONE;
+            }
         }
-
-        if (path.startsWith("/api/system-configs")) {
-            return AuthRequirement.ADMIN;
+        for (String prefix : guard.getAdminPathPrefixes()) {
+            if (prefix != null && path.startsWith(prefix)) {
+                return AuthRequirement.ADMIN;
+            }
         }
-
-        if (path.startsWith("/api/front/") && !path.startsWith("/api/front/auth")) {
-            return AuthRequirement.FRONT;
+        for (String prefix : guard.getFrontPathPrefixes()) {
+            if (prefix != null && path.startsWith(prefix)) {
+                return AuthRequirement.FRONT;
+            }
         }
-
         return AuthRequirement.NONE;
     }
 

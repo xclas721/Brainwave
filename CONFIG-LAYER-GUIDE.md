@@ -22,7 +22,7 @@
 
 ## 4. 已落地範圍（第一、二階段）
 
-- `AuthProperties`：接管 `app.auth.demo.*`、`app.auth.front.demo.*`、`app.auth.guard.enabled`
+- `AuthProperties`：接管 `app.auth.demo.*`、`app.auth.front.demo.*`、`app.auth.guard.enabled` 與 **Guard 路徑**（`admin-path-prefixes`、`front-path-prefixes`、`front-exclude-prefixes`），詳見 RBAC-GUIDE。
 - `CorsProperties`：接管 `app.cors.allowed-origins`、`app.cors.allow-credentials`
 - `StorageProperties`：定義 `app.storage.*`（local / s3）型別化骨架
 - `AuditProperties`：定義 `app.audit.*`（啟用、body、遮罩）型別化骨架

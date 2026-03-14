@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * 稽核日誌切面：攔截標記了 @Audit 的方法，依設定記錄操作資訊。
  * 若有登入，會從 request attribute {@value #ATTR_AUTH_PRINCIPAL} 取 principal；
  * requestId 來自 MDC（由 CorrelationIdFilter 等寫入）。
+ * 輸出由 AuditLogService 處理（app.audit.sink=console 或 db）。
  */
 @Aspect
 @Component
@@ -29,6 +30,7 @@ public class AuditAspect {
     public static final String ATTR_AUTH_PRINCIPAL = "auth.principal";
 
     private final AuditProperties auditProperties;
+    private final AuditLogService auditLogService;
 
     @Around("@annotation(audit)")
     public Object logAround(ProceedingJoinPoint joinPoint, Audit audit) throws Throwable {
@@ -66,17 +68,8 @@ public class AuditAspect {
             String resource = !audit.resource().isEmpty() ? audit.resource() : methodName;
             boolean success = (error == null);
 
-            log.info(
-                    "AUDIT action={} resource={} method={} path={} success={} durationMs={} requestId={} principal={}",
-                    action,
-                    resource,
-                    method,
-                    path,
-                    success,
-                    durationMs,
-                    requestId != null ? requestId : "",
-                    principal
-            );
+            AuditRecord record = new AuditRecord(action, resource, method, path, success, durationMs, requestId, principal);
+            auditLogService.record(record);
         }
     }
 }

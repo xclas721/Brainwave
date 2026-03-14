@@ -1,0 +1,41 @@
+# 安全與限流（P6）
+
+> 目的：上線前可依需求加上回應標頭防護與呼叫頻率限制，本檔為指引與可選實作方式。
+
+## 1. 安全回應標頭（Security Headers）
+
+建議在回應中加上下列標頭，可由 Filter 或 WebMvcConfigurer 統一設定：
+
+| 標頭 | 建議值 | 說明 |
+|------|--------|------|
+| `X-Content-Type-Options` | `nosniff` | 避免 MIME 嗅探 |
+| `X-Frame-Options` | `DENY` 或 `SAMEORIGIN` | 減少 clickjacking |
+| `X-XSS-Protection` | `1; mode=block` | 舊版瀏覽器 XSS 緩和（可選） |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | HTTPS 時啟用 HSTS |
+| `Content-Security-Policy` | 依前端需求設定 | 限制資源來源（較複雜，可後補） |
+
+**實作方式**：新增一支 `SecurityHeadersFilter` 或 `WebMvcConfigurer` 的 `addInterceptors` / `addResourceHandlers` 搭配 `ResponseBodyAdvice` 較少用，一般用 **Filter** 在 response 寫入上述 header 即可。
+
+## 2. 速率限制（Rate Limit）
+
+目的：避免單一 IP 或單一 token 短時間大量請求，拖垮服務或遭濫用。
+
+| 方式 | 說明 |
+|------|------|
+| **Bucket4j** | 以 token bucket 做限流，可依 IP 或 userId 維持有狀態的 bucket；需引入依賴並在 Filter 或 Interceptor 中判斷。 |
+| **自訂 Filter** | 以記憶體或 Redis 記錄「key（IP/userId）+ 時間窗 + 計數」，超過閾值回 429。 |
+| **Gateway / 雲端** | 若 API 前有 API Gateway、CDN 或雲端 WAF，可於該層做限流，應用層可不實作。 |
+
+**建議**：先以**文件與介面**約定「限流維度（IP / 使用者）、閾值、429 回應格式」；實作可選 Filter + 記憶體 Map，或引入 Bucket4j，必要時改為 Redis 以支援多實例。
+
+## 3. 與本專案的銜接
+
+- **Guard**：限流建議放在 **Guard 之前**（或同一層），先限流再驗證，避免惡意請求耗盡驗證邏輯。
+- **CORS**：已由 CorsConfig 處理來源白名單；安全標頭為**額外**回應標頭，不影響 CORS 邏輯。
+- **設定**：若實作限流，可考慮 `app.rate-limit.enabled`、`app.rate-limit.requests-per-minute` 等，由設定開關與調參。
+
+## 4. 實作時機
+
+- **僅文件**：本檔即為指引，上線前再決定是否實作。
+- **先做安全標頭**：實作簡單、風險低，可先加 Filter。
+- **限流**：有對外開放或高流量需求時再引入；內部管理後台可延後。

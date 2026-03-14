@@ -18,6 +18,8 @@ import org.springframework.validation.annotation.Validated;
 public class AuditProperties {
 
     private boolean enabled = false;
+    /** 輸出目標：console（僅 log）或 db（寫入 audit_log 表） */
+    private String sink = "console";
     private boolean includeRequestBody = false;
     private boolean includeResponseBody = false;
     @Min(1)
@@ -31,6 +33,14 @@ public class AuditProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getSink() {
+        return sink;
+    }
+
+    public void setSink(String sink) {
+        this.sink = sink != null ? sink : "console";
     }
 
     public boolean isIncludeRequestBody() {

@@ -94,4 +94,61 @@ class AuthGuardInterceptorTest {
 
         assertTrue(allowed);
     }
+
+    @Test
+    void preHandle_customAdminPathFromConfig_shouldRequireAdmin() {
+        authProperties.getGuard().setAdminPathPrefixes(java.util.List.of("/api/orders", "/api/users"));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders");
+        request.addHeader("Authorization", "Bearer user-1-xyz");
+        TokenPrincipal principal = new TokenPrincipal("ADMIN_USER", "1");
+        when(authFacade.verifyToken("user-1-xyz")).thenReturn(principal);
+
+        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+
+        assertTrue(allowed);
+        assertEquals(principal, request.getAttribute(AuthGuardInterceptor.ATTR_AUTH_PRINCIPAL));
+    }
+
+    @Test
+    void preHandle_frontExcludePath_shouldPassWithoutVerification() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/front/auth/login");
+        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        assertTrue(allowed);
+        verifyNoInteractions(authFacade);
+    }
+
+    @Test
+    void preHandle_guardDisabled_shouldPassWithoutVerification() {
+        authProperties.getGuard().setEnabled(false);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/users");
+        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        assertTrue(allowed);
+        verifyNoInteractions(authFacade);
+    }
+
+    @Test
+    void preHandle_adminPathWithViewerRole_shouldPass() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/system-configs");
+        request.addHeader("Authorization", "Bearer viewer-1-xyz");
+        TokenPrincipal principal = new TokenPrincipal("ADMIN_VIEWER", "1", "VIEWER");
+        when(authFacade.verifyToken("viewer-1-xyz")).thenReturn(principal);
+
+        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+
+        assertTrue(allowed);
+        assertEquals(principal, request.getAttribute(AuthGuardInterceptor.ATTR_AUTH_PRINCIPAL));
+    }
+
+    @Test
+    void preHandle_bearerWithEmptyToken_shouldReturnUnauthorized() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/users");
+        request.addHeader("Authorization", "Bearer ");
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> interceptor.preHandle(request, (HttpServletResponse) null, new Object())
+        );
+        assertEquals(401, ex.getStatusCode().value());
+        verifyNoInteractions(authFacade);
+    }
 }

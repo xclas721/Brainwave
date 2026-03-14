@@ -7,9 +7,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * 現階段最小可用 mock token 驗證器。
- * 規則僅用於開發階段，正式環境可替換為 JWT verifier。
+ * 規則僅用於開發階段；啟用 profile=jwt 時改由 JwtTokenVerifier 接手。
  */
 @Component
+@org.springframework.context.annotation.Profile("!jwt")
 public class MockTokenVerifier implements TokenVerifier {
 
     @Override

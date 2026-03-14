@@ -26,6 +26,26 @@
       "description": "是否啟用 API Auth Guard。"
     },
     {
+      "name": "app.auth.guard.admin-path-prefixes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "需後台登入的路徑前綴，符合任一即要求 ADMIN scope。"
+    },
+    {
+      "name": "app.auth.guard.front-path-prefixes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "需前台登入的路徑前綴，符合任一即要求 FRONT scope。"
+    },
+    {
+      "name": "app.auth.guard.front-exclude-prefixes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "自前台路徑排除的前綴（例如登入入口）。"
+    },
+    {
+      "name": "app.auth.jwt.secret",
+      "type": "java.lang.String",
+      "description": "JWT HMAC 簽章用 secret（profile=jwt 時必填，至少 32 字元）。"
+    },
+    {
       "name": "app.cors.allowed-origins",
       "type": "java.util.List<java.lang.String>",
       "description": "允許跨域來源白名單。"
@@ -69,6 +89,11 @@
       "name": "app.audit.enabled",
       "type": "java.lang.Boolean",
       "description": "是否啟用稽核日誌。"
+    },
+    {
+      "name": "app.audit.sink",
+      "type": "java.lang.String",
+      "description": "稽核輸出目標：console（僅 log）或 db（寫入 audit_log 表）。"
     },
     {
       "name": "app.audit.include-request-body",
