@@ -1,6 +1,7 @@
 package com.brainwave.backend.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -33,6 +34,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class UserControllerTest {
 
     @Mock
@@ -113,7 +115,9 @@ class UserControllerTest {
         assertEquals("john", requestCaptor.getValue().getName());
         assertEquals(0, pageableCaptor.getValue().getPageNumber());
         assertEquals(10, pageableCaptor.getValue().getPageSize());
-        assertEquals(Sort.Direction.ASC, pageableCaptor.getValue().getSort().getOrderFor("id").getDirection());
+        Sort.Order order = pageableCaptor.getValue().getSort().getOrderFor("id");
+        assertNotNull(order);
+        assertEquals(Sort.Direction.ASC, order.getDirection());
     }
 
     @Test

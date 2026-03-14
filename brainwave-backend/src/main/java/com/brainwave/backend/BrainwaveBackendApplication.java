@@ -1,5 +1,6 @@
 package com.brainwave.backend;
 
+import com.brainwave.backend.config.AppStartupProperties;
 import com.brainwave.core.BrainwaveCoreConfiguration;
 import com.brainwave.service.BrainwaveServiceConfiguration;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
@@ -16,6 +18,7 @@ import org.springframework.core.env.Environment;
  * 前端 API 服務，提供 RESTful API 給前端使用
  */
 @Import({BrainwaveCoreConfiguration.class, BrainwaveServiceConfiguration.class})
+@EnableConfigurationProperties(AppStartupProperties.class)
 @SpringBootApplication(scanBasePackages = {"com.brainwave"})
 public class BrainwaveBackendApplication {
 
@@ -26,9 +29,9 @@ public class BrainwaveBackendApplication {
     }
 
     @Bean
-    ApplicationRunner startupSuccessLog(Environment env) {
+    ApplicationRunner startupSuccessLog(AppStartupProperties startupProps, Environment env) {
         return args -> {
-            String baseUrl = env.getProperty("app.startup.api-base-url", "").trim();
+            String baseUrl = startupProps.getApiBaseUrl();
             if (!baseUrl.isEmpty()) {
                 log.info("後端啟動成功，API 根路徑: {}/api", baseUrl.replaceAll("/+$", ""));
             } else {

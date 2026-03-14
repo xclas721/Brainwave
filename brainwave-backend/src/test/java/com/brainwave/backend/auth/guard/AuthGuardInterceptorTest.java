@@ -10,13 +10,13 @@ import static org.mockito.Mockito.when;
 import com.brainwave.backend.auth.dto.TokenPrincipal;
 import com.brainwave.backend.auth.facade.AuthFacade;
 import com.brainwave.core.config.properties.AuthProperties;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ class AuthGuardInterceptorTest {
     @Test
     void preHandle_publicPath_shouldPassWithoutVerification() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/health");
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
         assertTrue(allowed);
         verifyNoInteractions(authFacade);
     }
@@ -49,7 +49,7 @@ class AuthGuardInterceptorTest {
 
         ResponseStatusException ex = assertThrows(
                 ResponseStatusException.class,
-                () -> interceptor.preHandle(request, (HttpServletResponse) null, new Object())
+                () -> interceptor.preHandle(request, new MockHttpServletResponse(), new Object())
         );
 
         assertEquals(401, ex.getStatusCode().value());
@@ -63,7 +63,7 @@ class AuthGuardInterceptorTest {
 
         ResponseStatusException ex = assertThrows(
                 ResponseStatusException.class,
-                () -> interceptor.preHandle(request, (HttpServletResponse) null, new Object())
+                () -> interceptor.preHandle(request, new MockHttpServletResponse(), new Object())
         );
 
         assertEquals(403, ex.getStatusCode().value());
@@ -76,7 +76,7 @@ class AuthGuardInterceptorTest {
         TokenPrincipal principal = new TokenPrincipal("ADMIN_USER", "7");
         when(authFacade.verifyToken("user-7-xyz")).thenReturn(principal);
 
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
 
         assertTrue(allowed);
         verify(authFacade).verifyToken("user-7-xyz");
@@ -90,7 +90,7 @@ class AuthGuardInterceptorTest {
         TokenPrincipal principal = new TokenPrincipal("FRONT_USER", "5");
         when(authFacade.verifyToken("front-user-5-xyz")).thenReturn(principal);
 
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
 
         assertTrue(allowed);
     }
@@ -103,7 +103,7 @@ class AuthGuardInterceptorTest {
         TokenPrincipal principal = new TokenPrincipal("ADMIN_USER", "1");
         when(authFacade.verifyToken("user-1-xyz")).thenReturn(principal);
 
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
 
         assertTrue(allowed);
         assertEquals(principal, request.getAttribute(AuthGuardInterceptor.ATTR_AUTH_PRINCIPAL));
@@ -112,7 +112,7 @@ class AuthGuardInterceptorTest {
     @Test
     void preHandle_frontExcludePath_shouldPassWithoutVerification() {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/front/auth/login");
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
         assertTrue(allowed);
         verifyNoInteractions(authFacade);
     }
@@ -121,7 +121,7 @@ class AuthGuardInterceptorTest {
     void preHandle_guardDisabled_shouldPassWithoutVerification() {
         authProperties.getGuard().setEnabled(false);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/users");
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
         assertTrue(allowed);
         verifyNoInteractions(authFacade);
     }
@@ -133,7 +133,7 @@ class AuthGuardInterceptorTest {
         TokenPrincipal principal = new TokenPrincipal("ADMIN_VIEWER", "1", "VIEWER");
         when(authFacade.verifyToken("viewer-1-xyz")).thenReturn(principal);
 
-        boolean allowed = interceptor.preHandle(request, (HttpServletResponse) null, new Object());
+        boolean allowed = interceptor.preHandle(request, new MockHttpServletResponse(), new Object());
 
         assertTrue(allowed);
         assertEquals(principal, request.getAttribute(AuthGuardInterceptor.ATTR_AUTH_PRINCIPAL));
@@ -146,7 +146,7 @@ class AuthGuardInterceptorTest {
 
         ResponseStatusException ex = assertThrows(
                 ResponseStatusException.class,
-                () -> interceptor.preHandle(request, (HttpServletResponse) null, new Object())
+                () -> interceptor.preHandle(request, new MockHttpServletResponse(), new Object())
         );
         assertEquals(401, ex.getStatusCode().value());
         verifyNoInteractions(authFacade);

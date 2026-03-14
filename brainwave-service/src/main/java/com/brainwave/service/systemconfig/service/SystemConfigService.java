@@ -15,6 +15,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +77,7 @@ public class SystemConfigService extends BaseServiceImpl<SystemConfigEntity, Lon
         return converter.toVoList(findAll());
     }
 
-    public Page<SystemConfigVo> search(SystemConfigSearchRequest request, Pageable pageable) {
+    public Page<SystemConfigVo> search(SystemConfigSearchRequest request, @NonNull Pageable pageable) {
         Specification<SystemConfigEntity> spec = (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
 

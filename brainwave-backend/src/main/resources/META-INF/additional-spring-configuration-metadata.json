@@ -114,6 +114,11 @@
       "name": "app.audit.mask-fields",
       "type": "java.util.List<java.lang.String>",
       "description": "稽核日誌需遮罩的欄位名稱清單。"
+    },
+    {
+      "name": "app.startup.api-base-url",
+      "type": "java.lang.String",
+      "description": "選填；設定的話啟動 log 會印出「API 根路徑: {api-base-url}/api」（Zeabur 等部署可設 APP_STARTUP_API_BASE_URL）。"
     }
   ]
 }

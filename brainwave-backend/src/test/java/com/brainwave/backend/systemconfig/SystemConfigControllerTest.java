@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.brainwave.core.exception.GlobalExceptionHandler;
 import com.brainwave.service.systemconfig.dto.SystemConfigDto;
-import com.brainwave.service.systemconfig.request.SystemConfigRequest;
 import com.brainwave.service.systemconfig.service.SystemConfigService;
+import com.brainwave.service.systemconfig.vo.SystemConfigVo;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class SystemConfigControllerTest {
 
     @Mock
@@ -68,13 +69,13 @@ class SystemConfigControllerTest {
 
     @Test
     void search_shouldUseDefaultPagingAndReturnPageResponse() throws Exception {
-        Page<?> page = new PageImpl<>(
-                Collections.emptyList(),
+        Page<SystemConfigVo> page = new PageImpl<>(
+                Collections.<SystemConfigVo>emptyList(),
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id")),
                 0
         );
 
-        when(systemConfigService.search(any(), any(PageRequest.class))).thenReturn((Page) page);
+        when(systemConfigService.search(any(), any(PageRequest.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/system-configs/search").param("key", "SITE"))
                 .andExpect(status().isOk())
