@@ -1,4 +1,4 @@
-# 認證與 Token 驗證（P0-1）
+# 認證與 Token 驗證
 
 > 目標：登入與 Token 驗證可替換，預設為 Mock，正式環境可接 JWT 或 OAuth2。
 
@@ -43,5 +43,5 @@
 
 ## 4. 與 Guard、RBAC 的關係
 
-- AuthGuardInterceptor 依 **scope** 判斷是否為後台/前台，依 **role** 判斷權限（見 RBAC-GUIDE）。
+- AuthGuardInterceptor 依 **scope** 判斷是否為後台/前台，依 **role** 判斷權限（見 權限守衛與RBAC說明.md）。
 - TokenVerifier 只需產出正確的 `TokenPrincipal(scope, subject, role)`，不需知道路徑或權限規則。

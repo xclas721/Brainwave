@@ -1,4 +1,4 @@
-# RBAC 基礎版說明（P2-1）
+# RBAC 基礎版說明
 
 ## 角色定義
 
@@ -50,7 +50,7 @@ app:
 
 ## 替換為 JWT 驗證
 
-預設為 MockTokenVerifier；正式環境可改為 JWT。啟用方式與 claim 約定見 **AUTH-GUIDE.md**（profile=jwt、app.auth.jwt.secret、JwtTokenVerifier）。
+預設為 MockTokenVerifier；正式環境可改為 JWT。啟用方式與 claim 約定見 **認證與Token說明.md**（profile=jwt、app.auth.jwt.secret、JwtTokenVerifier）。
 
 ## 後續
 
