@@ -7,7 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 統一回應格式
+ * 統一回應格式。
+ * correlationId 為可選，由 ResultMapper 在有 CorrelationIdFilter 時從 MDC 帶入，供前端/客戶端串接追蹤。
  */
 @Data
 @Builder
@@ -20,6 +21,8 @@ public class Result<T> {
     private String message;
     private T data;
     private Instant timestamp;
+    /** 可選；由 DefaultResultMapper 從 MDC requestId 帶入，與 X-Request-ID 一致 */
+    private String correlationId;
 
     public static <T> Result<T> success(T data) {
         return Result.<T>builder()

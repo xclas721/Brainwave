@@ -8,6 +8,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -15,12 +16,17 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 稽核日誌切面：攔截標記了 @Audit 的方法，依設定記錄操作資訊。
+ * 若有登入，會從 request attribute {@value #ATTR_AUTH_PRINCIPAL} 取 principal；
+ * requestId 來自 MDC（由 CorrelationIdFilter 等寫入）。
  */
 @Aspect
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class AuditAspect {
+
+    /** 與 AuthGuardInterceptor 使用的 request attribute key 一致，供稽核取「誰」 */
+    public static final String ATTR_AUTH_PRINCIPAL = "auth.principal";
 
     private final AuditProperties auditProperties;
 
@@ -50,6 +56,9 @@ public class AuditAspect {
 
             String path = request != null ? request.getRequestURI() : "";
             String method = request != null ? request.getMethod() : "";
+            Object principalAttr = request != null ? request.getAttribute(ATTR_AUTH_PRINCIPAL) : null;
+            String principal = principalAttr != null ? principalAttr.toString() : "";
+            String requestId = MDC.get("requestId");
 
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             String methodName = signature.getDeclaringType().getSimpleName() + "." + signature.getName();
@@ -58,13 +67,15 @@ public class AuditAspect {
             boolean success = (error == null);
 
             log.info(
-                    "AUDIT action={} resource={} method={} path={} success={} durationMs={}",
+                    "AUDIT action={} resource={} method={} path={} success={} durationMs={} requestId={} principal={}",
                     action,
                     resource,
                     method,
                     path,
                     success,
-                    durationMs
+                    durationMs,
+                    requestId != null ? requestId : "",
+                    principal
             );
         }
     }

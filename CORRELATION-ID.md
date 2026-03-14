@@ -29,3 +29,7 @@ String correlationId = (String) request.getAttribute(CorrelationIdFilter.REQUEST
 ```
 
 或從 response header 取得（在回應已送出後）。
+
+## 與 Result 的銜接
+
+`DefaultResultMapper` 會從 MDC 讀取 `requestId` 並寫入 `Result.correlationId`，故 API 回應的 JSON body 中會帶有與 X-Request-ID 相同的追蹤 ID，前端或呼叫端可直接從 `result.correlationId` 對應日誌。

@@ -47,7 +47,7 @@ public ResponseEntity<Result<UserDto>> createUser(@Valid @RequestBody UserReques
 - 若 `app.audit.enabled=true`，則在 finally 區塊輸出一條類似下列格式的 log：
 
 ```text
-AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true durationMs=34
+AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true durationMs=34 requestId=abc-123 principal=TokenPrincipal[scope=ADMIN_USER, subject=7, role=ADMIN]
 ```
 
 目前記錄的欄位：
@@ -58,6 +58,8 @@ AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true 
 - `path`：請求路徑（例如 `/api/users`、`/api/system-configs`）
 - `success`：boolean，方法是否拋出例外
 - `durationMs`：方法執行時間（毫秒）
+- `requestId`：來自 MDC（由 CorrelationIdFilter 寫入），與 X-Request-ID 一致，方便與一般 log 串接
+- `principal`：若有登入，從 request attribute `auth.principal`（AuthGuardInterceptor 設定）取出的 principal 字串；未登入則為空
 
 ## 4. 已掛載範例
 
@@ -72,9 +74,7 @@ AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true 
 
 ## 5. 後續可擴充方向（非本次範圍）
 
-1. **加入「誰」的資訊**
-   - 從 `AuthGuardInterceptor` 放進 request attribute 的 `TokenPrincipal` 取出 subject / scope。
-   - 在 AUDIT log 中加入例如 `principal=ADMIN_USER(id=7)`。
+1. ~~**加入「誰」的資訊**~~（已實作：AuditAspect 從 request attribute `auth.principal` 取 principal，並從 MDC 取 requestId 一併寫入 log。）
 
 2. **落地到 DB 或外部 log 系統**
    - 新增 `audit_log` table 或對接 ELK / Loki 等集中 log 系統。
@@ -84,6 +84,5 @@ AUDIT action=CREATE_USER resource=USER method=POST path=/api/users success=true 
    - 依 `AuditProperties` 的 include* 與 maxBodyLength 決定是否抓 body。
    - 對 `maskFields` 中的欄位做遮罩（例如密碼、token）。
 
-4. **標準化格式與 trace id 整合**
-   - 後續若導入 Correlation ID / Request ID，可將該 ID 一併寫入 AUDIT log，方便跨系統追蹤。
+4. ~~**標準化格式與 trace id 整合**~~（已實作：AUDIT log 已含 requestId，與 CorrelationIdFilter 的 MDC 一致。）
 

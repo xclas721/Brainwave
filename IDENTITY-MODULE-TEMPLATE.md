@@ -81,6 +81,13 @@ brainwave-backend/src/main/java/com/brainwave/backend/identity/
 - 分頁：`Result<PageResponse<T>>`
 - 錯誤：由 `GlobalExceptionHandler`、`BusinessException` 等核心元件統一處理
 
+### 3.4 與認證／權限的銜接
+
+若新模組的 API 需要登入或依角色保護，須**同步**在後端註冊路徑：
+
+- 在 `AuthGuardInterceptor`（或日後改為設定檔）中，將新資源路徑（例如 `/api/accounts`）加入對應的 scope/role 要求；否則新 API 不會被 Guard 保護。
+- 詳見 `RBAC-GUIDE.md` 與 `BOILERPLATE-GENERALITY-CHECKLIST.md` 第 5 節依賴與銜接檢視。
+
 ---
 
 ## 4) 單軌 / 雙軌怎麼選？

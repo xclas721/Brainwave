@@ -9,7 +9,7 @@
 - **介面**：`com.brainwave.core.common.ResultMapper`  
   - `success(T data)`、`success(String message, T data)`、`fail(String code, String message)`
 - **預設實作**：`com.brainwave.backend.config.DefaultResultMapper`（`@Primary`）  
-  - 行為與原本 `Result.success()` / `Result.fail()` 一致
+  - 行為與原本 `Result.success()` / `Result.fail()` 一致，並從 MDC 帶入 `requestId` 至 `Result.correlationId`（與 CorrelationIdFilter 銜接）
 - **BaseController**：注入 `ResultMapper`（`required = false`），有注入時用 mapper 組裝回應，否則退回 `Result` 靜態方法
 
 ## 替換為自訂格式
