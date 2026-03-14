@@ -46,6 +46,9 @@ public class AuthGuardInterceptor implements HandlerInterceptor {
         if (!isScopeAllowed(requirement, principal.scope())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token scope 不足");
         }
+        if (!isRoleAllowed(requirement, principal.role())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "角色權限不足");
+        }
 
         request.setAttribute(ATTR_AUTH_PRINCIPAL, principal);
         return true;
@@ -57,6 +60,10 @@ public class AuthGuardInterceptor implements HandlerInterceptor {
         }
 
         if (path.startsWith("/api/users") || path.startsWith("/api/members")) {
+            return AuthRequirement.ADMIN;
+        }
+
+        if (path.startsWith("/api/system-configs")) {
             return AuthRequirement.ADMIN;
         }
 
@@ -77,6 +84,21 @@ public class AuthGuardInterceptor implements HandlerInterceptor {
             case NONE -> true;
         };
     }
+
+    private boolean isRoleAllowed(AuthRequirement requirement, String role) {
+        if (requirement == AuthRequirement.NONE) {
+            return true;
+        }
+        if (!StringUtils.hasText(role)) {
+            return false;
+        }
+        return switch (requirement) {
+            case ADMIN -> "ADMIN".equals(role) || "EDITOR".equals(role) || "VIEWER".equals(role);
+            case FRONT -> "MEMBER".equals(role);
+            case NONE -> true;
+        };
+    }
+
 
     private enum AuthRequirement {
         NONE,

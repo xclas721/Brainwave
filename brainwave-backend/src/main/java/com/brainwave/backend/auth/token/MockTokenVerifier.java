@@ -19,22 +19,22 @@ public class MockTokenVerifier implements TokenVerifier {
         }
 
         if (rawToken.startsWith("demo-")) {
-            return new TokenPrincipal("ADMIN_DEMO", "demo");
+            return new TokenPrincipal("ADMIN_DEMO", "demo", "ADMIN");
         }
         if (rawToken.startsWith("front-demo-")) {
-            return new TokenPrincipal("FRONT_DEMO", "demo");
+            return new TokenPrincipal("FRONT_DEMO", "demo", "MEMBER");
         }
 
         if (rawToken.startsWith("user-")) {
             String[] parts = rawToken.split("-", 3);
             if (parts.length >= 2 && StringUtils.hasText(parts[1])) {
-                return new TokenPrincipal("ADMIN_USER", parts[1]);
+                return new TokenPrincipal("ADMIN_USER", parts[1], "ADMIN");
             }
         }
         if (rawToken.startsWith("front-user-")) {
             String[] parts = rawToken.split("-", 4);
             if (parts.length >= 3 && StringUtils.hasText(parts[2])) {
-                return new TokenPrincipal("FRONT_USER", parts[2]);
+                return new TokenPrincipal("FRONT_USER", parts[2], "MEMBER");
             }
         }
 
