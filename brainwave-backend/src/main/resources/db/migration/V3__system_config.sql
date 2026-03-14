@@ -1,3 +1,4 @@
+-- 系統設定 Key-Value 表（見 SYSTEMCONFIG-GUIDE）
 CREATE TABLE IF NOT EXISTS system_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     config_key VARCHAR(100) NOT NULL,
@@ -8,4 +9,3 @@ CREATE TABLE IF NOT EXISTS system_config (
     updated_at DATETIME(6) NULL,
     CONSTRAINT uk_system_config_key UNIQUE (config_key)
 );
-

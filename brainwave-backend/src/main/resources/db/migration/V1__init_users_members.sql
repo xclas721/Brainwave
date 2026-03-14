@@ -1,3 +1,4 @@
+-- 基礎帳號表（users / members）
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,

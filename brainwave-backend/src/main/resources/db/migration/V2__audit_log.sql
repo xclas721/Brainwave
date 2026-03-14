@@ -1,3 +1,4 @@
+-- 稽核日誌表（見 AUDIT-GUIDE）
 CREATE TABLE IF NOT EXISTS audit_log (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     action VARCHAR(100) NOT NULL,
@@ -10,6 +11,5 @@ CREATE TABLE IF NOT EXISTS audit_log (
     principal VARCHAR(500) NULL,
     created_at DATETIME(6) NOT NULL
 );
-
 CREATE INDEX idx_audit_log_created_at ON audit_log (created_at);
 CREATE INDEX idx_audit_log_request_id ON audit_log (request_id);
