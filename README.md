@@ -12,5 +12,6 @@
 - `brainwave-service`：業務實作層（Entity/DTO/Service/Repository）
 - `brainwave-backend`：API 層（Controller / 對外介面）
 
-## User 範例定位
-- `user` 模組為可複製的範例模板，後續新增功能請複製後改為實際業務模組名稱。
+## User / Member 範例定位
+- `user`（後台帳號）與 `member`（前台會員）皆為**範例模組**，展示雙軌 Identity 的寫法。
+- 新專案可依需求保留單軌或雙軌；若只需一種帳號，請參考 `IDENTITY-MODULE-TEMPLATE.md` 的單軌/雙軌決策與**移除/整併指引**。
