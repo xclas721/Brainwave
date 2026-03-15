@@ -119,6 +119,11 @@
       "name": "app.startup.api-base-url",
       "type": "java.lang.String",
       "description": "選填；設定的話啟動 log 會印出「API 根路徑: {api-base-url}/api」（Zeabur 等部署可設 APP_STARTUP_API_BASE_URL）。"
+    },
+    {
+      "name": "app.seed.demo-accounts-enabled",
+      "type": "java.lang.Boolean",
+      "description": "啟動時是否自動建立示範帳號（demo 管理員與 demo 會員，密碼 123456）；設為 false 則不建立。"
     }
   ]
 }

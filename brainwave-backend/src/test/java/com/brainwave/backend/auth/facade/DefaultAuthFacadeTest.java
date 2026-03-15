@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.brainwave.backend.auth.dto.AuthLoginResult;
 import com.brainwave.backend.auth.dto.TokenPrincipal;
 import com.brainwave.backend.auth.token.TokenVerifier;
-import com.brainwave.core.config.properties.AuthProperties;
 import com.brainwave.service.member.dto.MemberDto;
 import com.brainwave.service.member.service.MemberService;
 import com.brainwave.service.user.dto.UserDto;
@@ -34,19 +33,18 @@ class DefaultAuthFacadeTest {
 
     @BeforeEach
     void setUp() {
-        AuthProperties authProperties = new AuthProperties();
-        authProperties.getDemo().setUsername("demo");
-        authProperties.getDemo().setPassword("demo");
-        authProperties.getFront().getDemo().setUsername("demo");
-        authProperties.getFront().getDemo().setPassword("demo");
-        authFacade = new DefaultAuthFacade(userService, memberService, tokenVerifier, authProperties);
+        authFacade = new DefaultAuthFacade(userService, memberService, tokenVerifier);
     }
 
     @Test
-    void loginAdmin_withDemoCredential_shouldReturnDemoToken() {
-        AuthLoginResult result = authFacade.loginAdmin("demo", "demo");
-        assertTrue(result.message().contains("Demo"));
-        assertTrue(result.response().getToken().startsWith("demo-"));
+    void loginAdmin_withValidCredential_shouldDelegateUserServiceAndReturnToken() {
+        when(userService.login("demo", "123456"))
+                .thenReturn(UserDto.builder().id(1L).username("demo").build());
+
+        AuthLoginResult result = authFacade.loginAdmin("demo", "123456");
+
+        verify(userService).login("demo", "123456");
+        assertTrue(result.response().getToken().startsWith("user-1-"));
     }
 
     @Test

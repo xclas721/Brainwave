@@ -1,6 +1,7 @@
 package com.brainwave.backend;
 
 import com.brainwave.backend.config.AppStartupProperties;
+import com.brainwave.backend.config.SeedProperties;
 import com.brainwave.core.BrainwaveCoreConfiguration;
 import com.brainwave.service.BrainwaveServiceConfiguration;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import org.springframework.core.env.Environment;
  * 前端 API 服務，提供 RESTful API 給前端使用
  */
 @Import({BrainwaveCoreConfiguration.class, BrainwaveServiceConfiguration.class})
-@EnableConfigurationProperties(AppStartupProperties.class)
+@EnableConfigurationProperties({AppStartupProperties.class, SeedProperties.class})
 @SpringBootApplication(scanBasePackages = {"com.brainwave"})
 public class BrainwaveBackendApplication {
 
